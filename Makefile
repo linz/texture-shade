@@ -1,7 +1,3 @@
-# gcc -O2 -funroll-loops -DNOMAIN -c *.c
-# gcc –O2 –funroll-loops *.o texture.c -o texture
-# gcc –O2 –funroll-loops *.o texture_image.c -o texture_image
-
 BIN_DIR := ./bin
 BUILD_DIR ?= ./build
 SRC_DIR ?= ./src
@@ -13,19 +9,21 @@ CC := gcc
 CFLAGS := -O2 -funroll-loops -DNOMAIN
 LDLIBS  := -lm
 
-all: bin/texture bin/texture_image
 
-bin/texture: $(OBJS)
-	    $(CC) $(LDFLAGS) $^ $(SRC_DIR)/texture.c -o $@ $(LDLIBS)
+all: $(BIN_DIR)/texture $(BIN_DIR)/texture_image
 
-bin/texture_image: $(OBJS)
-	    $(CC) $(LDFLAGS) $^ $(SRC_DIR)/texture_image.c -o $@ $(LDLIBS)
+$(BIN_DIR)/texture: $(OBJS) | $(BIN_DIR)/
+	mkdir -p $(@D)
+	$(CC) $(LDFLAGS) $^ $(SRC_DIR)/texture.c -o $@ $(LDLIBS)
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+$(BIN_DIR)/texture_image: $(OBJS) | $(BIN_DIR)/
+	$(CC) $(LDFLAGS) $^ $(SRC_DIR)/texture_image.c -o $@ $(LDLIBS)
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)/
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-$(BIN_DIR) $(BUILD_DIR):
-    $(MKDIR) $@
+$(BUILD_DIR)/ $(BIN_DIR)/:
+	mkdir -p $@
 
 .PHONY: all run clean
 
